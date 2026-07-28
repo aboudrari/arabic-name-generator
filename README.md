@@ -1,4 +1,4 @@
-[README (1).md](https://github.com/user-attachments/files/30428238/README.1.md)
+
 <p align="center">
   <img src="assets/banner.svg" alt="Arabic Name Generator" width="100%"/>
 </p>
