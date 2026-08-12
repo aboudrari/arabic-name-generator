@@ -1,4 +1,3 @@
-
 <p align="center">
   <img src="assets/banner.svg" alt="Arabic Name Generator" width="100%"/>
 </p>
@@ -7,7 +6,7 @@
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white"/>
   <img src="https://img.shields.io/badge/PyTorch-2.0+-EE4C2C?style=flat-square&logo=pytorch&logoColor=white"/>
   <img src="https://img.shields.io/badge/NumPy-1.24+-013243?style=flat-square&logo=numpy&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Status-In%20Progress-F59E0B?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Status-Complete-22C55E?style=flat-square"/>
   <img src="https://img.shields.io/badge/Inspired%20by-Zero%20to%20Hero-1D9E75?style=flat-square"/>
 </p>
 
@@ -36,12 +35,32 @@ Generated name: عامر ✓
 
 The model is a simple 3-layer MLP:
 
-1. **Embedding** — each character is mapped to a dense vector of size `d`
-2. **Hidden layer** — linear transformation + BatchNorm + Tanh activation
+1. **Embedding** — each character is mapped to a dense vector of size 10
+2. **Hidden layer** — linear transformation + Tanh activation (100 hidden units)
 3. **Output layer** — projects to vocabulary size, softmax gives character probabilities
-4. **Training** — negative log-likelihood loss, mini-batch gradient descent
+4. **Training** — cross-entropy loss, mini-batch SGD with learning rate decay (0.1 → 0.01)
+5. **Sampling** — temperature-controlled generation with a novel-name filter to avoid memorization
 
 No transformers. No attention. Just the fundamentals — and that's the point.
+
+---
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| Training loss | ~2.1 |
+| Validation loss | ~2.3 |
+| Test loss | ~2.3 |
+| Parameters | ~4,600 |
+| Novel names (temp=1.3) | ~40% plausible Arabic names |
+
+**Key finding:** without temperature sampling, 90% of outputs were exact copies from the training set. Temperature (1.2–1.4) is the sweet spot — enough creativity to generate new names, not so much that the outputs become noise.
+
+Sample output at `temperature=1.3`:
+```
+بشوى   بدير   غائزة   عبد الدين   إسماء   أدير   عبدة   آمن
+```
 
 ---
 
@@ -50,10 +69,9 @@ No transformers. No attention. Just the fundamentals — and that's the point.
 | Tool | Purpose |
 |------|---------|
 | Python 3.10+ | Core language |
-| NumPy | Linear algebra |
 | PyTorch | Tensors and autograd |
 | Pandas | Data loading and cleaning |
-| Matplotlib | Loss curves and activation histograms |
+| Matplotlib | Loss curves |
 | Jupyter | Interactive notebooks |
 
 ---
@@ -81,11 +99,11 @@ arabic-name-generator/
 ## Roadmap
 
 - [x] Phase 1 — Data loading and cleaning (207 unique names)
-- [ ] Phase 2 — Vocabulary: character-to-integer mappings
-- [ ] Phase 3 — Dataset: build (X, Y) training pairs with context window
-- [ ] Phase 4 — Model: Embedding + Hidden layer + BatchNorm
-- [ ] Phase 5 — Training loop: forward pass → loss → backward → update
-- [ ] Phase 6 — Sampling: generate new Arabic names from the model
+- [x] Phase 2 — Vocabulary: character-to-integer mappings (37 chars)
+- [x] Phase 3 — Dataset: build (X, Y) training pairs with context window (block_size=3)
+- [x] Phase 4 — Model: Embedding + Hidden layer + Tanh activation
+- [x] Phase 5 — Training loop: forward pass → loss → backward → update (30k steps)
+- [x] Phase 6 — Sampling: temperature-controlled generation with memorization filter
 
 ---
 
@@ -104,6 +122,12 @@ Then open `notebooks/arabic_name_generator.ipynb` in VS Code or Jupyter.
 ## Why Arabic names?
 
 Most character-level language model tutorials use English names or Shakespeare. Arabic is more interesting — a 28-letter alphabet, right-to-left script, rich morphology, and almost no existing implementations at this level. It's a harder and more meaningful challenge.
+
+---
+
+## Limitations
+
+The main constraint is dataset size — 207 names is small for a character-level model. The architecture works and the failure modes are understood. Scaling the dataset would directly improve output quality. BatchNorm was intentionally left out to keep the implementation minimal and readable.
 
 ---
 
